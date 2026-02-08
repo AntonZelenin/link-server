@@ -44,18 +44,18 @@ async def register(user_data: UserRegisterData, session: DBSessionDep):
     user_ = await repository.create_user(session, user_data.username)
 
     try:
-        match helpers.user.create_user_in_auth(user_.id, user_.username, user_data.password):
+        match helpers.user.create_user_in_auth(user_.user_id, user_.username, user_data.password):
             case Ok(_):
                 return await login(user_data)
             case Err(message):
                 # todo it always returns 400, even if auth is down and it should be 500
-                await repository.delete_user(session, user_.id)
+                await repository.delete_user(session, user_.user_id)
                 return JSONResponse(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     content=message,
                 )
     except Exception as e:
-        await repository.delete_user(session, user_.id)
+        await repository.delete_user(session, user_.user_id)
         raise e
 
 
@@ -77,7 +77,7 @@ async def find_users(
         user_: User = Depends(helpers.user.get_current_active_user),
 ) -> SearchUsersResponse:
     users = await repository.search_users(session, username, exclude_username=user_.username)
-    return SearchUsersResponse(users=[schemas.User(id=u.id, username=u.username) for u in users])
+    return SearchUsersResponse(users=[schemas.User(user_id=u.user_id, username=u.username) for u in users])
 
 
 @app.post('/api/user/v1/users/batch-query')
@@ -86,4 +86,4 @@ async def get_users_by_ids(req: GetUsersByIdsRequest, session: DBSessionDep) -> 
         return SearchUsersResponse(users=[])
 
     db_users = await repository.get_users(session, req.user_ids)
-    return SearchUsersResponse(users=[schemas.User(id=db_user.id, username=db_user.username) for db_user in db_users])
+    return SearchUsersResponse(users=[schemas.User(user_id=db_user.user_id, username=db_user.username) for db_user in db_users])

@@ -7,7 +7,7 @@ from mess_user.models.user import User
 
 
 async def get_user(session: AsyncSession, user_id: str) -> Optional[User]:
-    return (await session.scalars(select(User).filter(User.id == user_id))).first()
+    return (await session.scalars(select(User).filter(User.user_id == user_id))).first()
 
 
 async def create_user(session: AsyncSession, username: str) -> User:
@@ -20,7 +20,7 @@ async def create_user(session: AsyncSession, username: str) -> User:
 
 
 async def delete_user(session: AsyncSession, user_id: str) -> None:
-    user = await session.scalar(select(User).filter(User.id == user_id))
+    user = await session.scalar(select(User).filter(User.user_id == user_id))
     await session.delete(user)
     await session.commit()
 
@@ -44,4 +44,4 @@ async def search_users(
 
 
 async def get_users(session: AsyncSession, user_ids: list[str]) -> Sequence[User]:
-    return (await session.scalars(select(User).filter(User.id.in_(user_ids)))).all()
+    return (await session.scalars(select(User).filter(User.user_id.in_(user_ids)))).all()

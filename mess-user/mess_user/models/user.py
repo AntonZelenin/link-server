@@ -15,7 +15,8 @@ PASSWORD_MAX_LENGTH = 64
 class User(Base):
     __tablename__ = 'users'
 
-    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=helpers.uuid)
+    user_id: Mapped[str] = mapped_column(String(32), primary_key=True, default=helpers.uuid)
     username: Mapped[str] = mapped_column(String(USERNAME_MAX_LENGTH), nullable=False, unique=True)
+    hashed_password: Mapped[str] = mapped_column(String(72), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[str] = mapped_column(String(32), default=datetime.now(timezone.utc).isoformat())

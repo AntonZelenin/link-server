@@ -31,7 +31,7 @@ class SearchUserRequest(BaseModel):
 
 
 class User(BaseModel):
-    id: str
+    user_id: str
     username: str
 
 
