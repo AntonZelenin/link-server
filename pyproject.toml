@@ -1,0 +1,68 @@
+[tool.poetry]
+name = "link-server"
+version = "0.1.0"
+description = "Unified messaging platform with auth, user, and message services"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [
+    { include = "mess_auth", from = "mess-auth" },
+    { include = "mess_user", from = "mess-user" },
+    { include = "mess_message", from = "mess-message" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.14"
+# Core dependencies (shared by all services)
+fastapi = "^0.110.0"
+uvicorn = {extras = ["standard"], version = "^0.26.0"}
+pydantic = "^2.5.3"
+pydantic-settings = "^2.1.0"
+python-dotenv = "^1.0.1"
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.25"}
+alembic = "^1.13.1"
+psycopg2 = "^2.9.9"
+asyncpg = "^0.29.0"
+aiosqlite = "^0.19.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pytest-asyncio = "^0.23.0"
+black = "^24.0.0"
+ruff = "^0.2.0"
+mypy = "^1.8.0"
+
+# Service-specific dependency groups
+[tool.poetry.group.mess-auth.dependencies]
+python-multipart = "^0.0.19"
+python-jose = {extras = ["cryptography"], version = "^3.4.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+
+[tool.poetry.group.mess-user.dependencies]
+httpx = "^0.26.0"
+requests = "^2.32.0"
+result = "^0.16.0"
+
+[tool.poetry.group.mess-message.dependencies]
+httpx = "^0.26.0"
+requests = "^2.32.0"
+result = "^0.16.0"
+redis = "^5.0.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 100
+target-version = ['py314']
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+
+[tool.mypy]
+python_version = "3.14"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+
