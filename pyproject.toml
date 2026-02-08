@@ -5,7 +5,6 @@ description = "Unified messaging platform with auth, user, and message services"
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
 packages = [
-    { include = "mess_auth", from = "mess-auth" },
     { include = "mess_user", from = "mess-user" },
     { include = "mess_message", from = "mess-message" }
 ]
@@ -32,11 +31,6 @@ ruff = "^0.2.0"
 mypy = "^1.8.0"
 
 # Service-specific dependency groups
-[tool.poetry.group.mess-auth.dependencies]
-python-multipart = "^0.0.19"
-python-jose = {extras = ["cryptography"], version = "^3.4.0"}
-passlib = {extras = ["bcrypt"], version = "^1.7.4"}
-
 [tool.poetry.group.mess-user.dependencies]
 python-multipart = "^0.0.19"
 python-jose = {extras = ["cryptography"], version = "^3.4.0"}
