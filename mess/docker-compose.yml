@@ -1,0 +1,161 @@
+x-kong-config:
+  &kong-env
+  KONG_DATABASE: ${KONG_DATABASE:-off}
+
+services:
+  kong:
+    build:
+      context: .
+      dockerfile: Kong.Dockerfile
+    container_name: kong
+    user: "${KONG_USER:-kong}"
+    environment:
+      <<: *kong-env
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_PROXY_LISTEN: "${KONG_PROXY_LISTEN:-0.0.0.0:8000}"
+      KONG_ADMIN_LISTEN: "${KONG_ADMIN_LISTEN:-0.0.0.0:8001}"
+      KONG_ADMIN_GUI_LISTEN: "${KONG_ADMIN_GUI_LISTEN:-0.0.0.0:8002}"
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_PREFIX: ${KONG_PREFIX:-/var/run/kong}
+      KONG_DECLARATIVE_CONFIG: "/opt/kong/kong.yaml"
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_KEY: ${JWT_KEY}
+    networks:
+      - mess-net
+    ports:
+      # The following two environment variables default to an insecure value (0.0.0.0)
+      # according to the CIS Security test.
+      - "${KONG_INBOUND_PROXY_LISTEN:-0.0.0.0}:55800:8000/tcp"
+      - "${KONG_INBOUND_SSL_PROXY_LISTEN:-0.0.0.0}:55843:8443/tcp"
+      # Making them mandatory but undefined, like so would be backwards-breaking:
+      # - "${KONG_INBOUND_PROXY_LISTEN?Missing inbound proxy host}:8001:8000/tcp"
+      # - "${KONG_INBOUND_SSL_PROXY_LISTEN?Missing inbound proxy ssl host}:8443:8443/tcp"
+      # Alternative is deactivating check 5.13 in the security bench, if we consider Kong's own config to be enough security here
+
+      - "127.0.0.1:8001:8001/tcp"
+      - "127.0.0.1:8444:8444/tcp"
+      - "127.0.0.1:8002:8002/tcp"
+    healthcheck:
+      test: [ "CMD", "kong", "health" ]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    restart: always
+    read_only: true
+    volumes:
+      - kong_prefix_vol:${KONG_PREFIX:-/var/run/kong}
+      - kong_tmp_vol:/tmp
+      - ./config:/opt/kong
+    security_opt:
+      - no-new-privileges
+
+  auth:
+    image: mess_auth:0.1.0
+    restart: always
+    container_name: auth
+    hostname: auth
+    networks:
+      - mess-net
+    depends_on:
+      - auth_db
+    env_file:
+      - auth_prod.env
+
+  auth_db:
+    image: postgres:16
+    restart: always
+    container_name: auth_db
+    hostname: auth_db
+    networks:
+      - mess-net
+    volumes:
+      - auth_db:/var/lib/postgresql/data
+    env_file:
+      - auth_prod_db.env
+    ports:
+      - "5433:5432"
+
+  user:
+    image: mess_user:0.1.0
+    restart: always
+    container_name: user
+    hostname: user
+    networks:
+      - mess-net
+    depends_on:
+      - user_db
+    env_file:
+      - user_prod.env
+
+  user_db:
+    image: postgres:16
+    restart: always
+    container_name: user_db
+    hostname: user_db
+    networks:
+      - mess-net
+    volumes:
+      - user_db:/var/lib/postgresql/data
+    env_file:
+      - user_prod_db.env
+    ports:
+      - "5434:5432"
+
+  message:
+    image: mess_message:0.1.0
+    restart: always
+    container_name: message
+    hostname: message
+    networks:
+      - mess-net
+    depends_on:
+      - message_db
+    env_file:
+      - message_prod.env
+
+  message_db:
+    image: postgres:16
+    restart: always
+    container_name: message_db
+    hostname: message_db
+    networks:
+      - mess-net
+    volumes:
+      - message_db:/var/lib/postgresql/data
+    env_file:
+      - message_prod_db.env
+    ports:
+      - "5435:5432"
+
+#  redis-cache:
+#    image: redis/redis-stack:7.2.0-v9
+#    container_name: redis-cache
+#    hostname: redis-cache
+#    networks:
+#      - mess-net
+#    restart: always
+#    volumes:
+#      - redis_cache:/data
+#    ports:
+#      - "6379:6379"
+#      - "8001:8001"
+
+volumes:
+  auth_db:
+  user_db:
+  message_db:
+  kong_prefix_vol:
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+  kong_tmp_vol:
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+  redis_cache:
+
+networks:
+  mess-net:
+    external: false

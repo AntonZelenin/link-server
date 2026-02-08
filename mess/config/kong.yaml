@@ -1,0 +1,156 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: user-service
+    url: http://user
+    routes:
+      - name: get-users
+        paths:
+          - /api/user/v1/users
+        methods:
+          - GET
+        strip_path: false
+      - name: get-users-by-ids
+        paths:
+          - /api/user/v1/users/batch-query
+        methods:
+          - POST
+          - OPTIONS
+        strip_path: false
+
+  - name: user-service-public
+    url: http://user
+    routes:
+      - name: register-new-user
+        paths:
+          - /api/user/v1/users
+        methods:
+          - POST
+          - OPTIONS
+        strip_path: false
+
+  - name: login-service
+    url: http://auth
+    routes:
+      - name: refresh-token
+        paths:
+          - /api/auth/v1/refresh-token
+        strip_path: false
+      - name: login
+        paths:
+          - /api/auth/v1/login
+        strip_path: false
+      - name: logout
+        paths:
+          - /api/auth/v1/logout
+        strip_path: false
+
+  - name: message-service
+    url: http://message
+    routes:
+      - name: get-messages
+        paths:
+          - /api/message/v1/messages
+        strip_path: false
+      - name: ws-handshake
+        paths:
+          - /ws/message/v1/messages
+        strip_path: false
+        protocols:
+          - http
+          - https
+      - name: create-chat
+        paths:
+          - /api/message/v1/chats
+        methods:
+          - POST
+          - GET
+          - OPTIONS
+        strip_path: false
+
+  - name: ws-message-service
+    url: ws://message
+    routes:
+      - name: ws-send-message
+        paths:
+          - /ws/message/v1/messages
+        strip_path: false
+        protocols:
+          - http
+          - https
+
+plugins:
+  - name: cors
+    config:
+      origins:
+        - "http://localhost:8080"
+        - "http://127.0.0.1:8080"
+        - "http://192.168.0.*"
+      methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - OPTIONS
+      headers:
+        - Authorization
+        - Content-Type
+      credentials: true
+      max_age: 3600
+
+  - name: jwt
+    service: user-service
+    enabled: true
+    config:
+      key_claim_name: kid
+      claims_to_verify:
+        - exp
+
+  - name: jwt
+    service: message-service
+    enabled: true
+    config:
+      key_claim_name: kid
+      claims_to_verify:
+        - exp
+
+  - name: jwt
+    service: ws-message-service
+    enabled: true
+    config:
+      key_claim_name: kid
+      claims_to_verify:
+        - exp
+
+  - name: jwt-claims-headers
+    service: user-service
+    enabled: true
+    config:
+      claims_to_include:
+        - user-id
+        - username
+
+  - name: jwt-claims-headers
+    service: message-service
+    enabled: true
+    config:
+      claims_to_include:
+        - user-id
+        - username
+
+#  - name: request-transformer
+#    service: user-service
+#    enabled: true
+#    config:
+#      remove:
+#        headers:
+#          - Authorization
+
+consumers:
+  - username: login_server
+
+jwt_secrets:
+  - consumer: login_server
+    secret: "${JWT_SECRET}"
+    key: "${JWT_KEY}"
