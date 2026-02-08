@@ -51,32 +51,6 @@ services:
     security_opt:
       - no-new-privileges
 
-  auth:
-    image: mess_auth:0.1.0
-    restart: always
-    container_name: auth
-    hostname: auth
-    networks:
-      - mess-net
-    depends_on:
-      - auth_db
-    env_file:
-      - auth_prod.env
-
-  auth_db:
-    image: postgres:16
-    restart: always
-    container_name: auth_db
-    hostname: auth_db
-    networks:
-      - mess-net
-    volumes:
-      - auth_db:/var/lib/postgresql/data
-    env_file:
-      - auth_prod_db.env
-    ports:
-      - "5433:5432"
-
   user:
     image: mess_user:0.1.0
     restart: always
@@ -143,7 +117,6 @@ services:
 #      - "8001:8001"
 
 volumes:
-  auth_db:
   user_db:
   message_db:
   kong_prefix_vol:

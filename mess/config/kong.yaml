@@ -31,7 +31,7 @@ services:
         strip_path: false
 
   - name: login-service
-    url: http://auth
+    url: http://user
     routes:
       - name: refresh-token
         paths:
