@@ -9,7 +9,10 @@ from mess_user import constants
 class Settings(BaseSettings):
     db_url: str
     async_db_url: str
-    auth_url: str
+    jwt_secret_key: str
+    jwt_kid: str
+    access_token_expire_minutes: int
+    refresh_token_expire_minutes: int
 
     def __init__(self):
         if os.environ.get('ENVIRONMENT', 'dev') == 'dev':

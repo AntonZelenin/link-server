@@ -38,9 +38,9 @@ python-jose = {extras = ["cryptography"], version = "^3.4.0"}
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 
 [tool.poetry.group.mess-user.dependencies]
-httpx = "^0.26.0"
-requests = "^2.32.0"
-result = "^0.16.0"
+python-multipart = "^0.0.19"
+python-jose = {extras = ["cryptography"], version = "^3.4.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 
 [tool.poetry.group.mess-message.dependencies]
 httpx = "^0.26.0"
