@@ -5,7 +5,6 @@ description = "Unified messaging platform with auth, user, and message services"
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
 packages = [
-    { include = "mess_auth", from = "mess-auth" },
     { include = "mess_user", from = "mess-user" },
     { include = "mess_message", from = "mess-message" }
 ]
@@ -21,7 +20,7 @@ python-dotenv = "^1.0.1"
 sqlalchemy = {extras = ["asyncio"], version = "^2.0.25"}
 alembic = "^1.13.1"
 psycopg2 = "^2.9.9"
-asyncpg = "^0.29.0"
+asyncpg = "^0.30.0"
 aiosqlite = "^0.19.0"
 
 [tool.poetry.group.dev.dependencies]
@@ -32,15 +31,10 @@ ruff = "^0.2.0"
 mypy = "^1.8.0"
 
 # Service-specific dependency groups
-[tool.poetry.group.mess-auth.dependencies]
+[tool.poetry.group.mess-user.dependencies]
 python-multipart = "^0.0.19"
 python-jose = {extras = ["cryptography"], version = "^3.4.0"}
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
-
-[tool.poetry.group.mess-user.dependencies]
-httpx = "^0.26.0"
-requests = "^2.32.0"
-result = "^0.16.0"
 
 [tool.poetry.group.mess-message.dependencies]
 httpx = "^0.26.0"

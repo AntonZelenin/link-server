@@ -9,6 +9,7 @@ from alembic import context
 
 from mess_user import models
 from mess_user.models.user import User
+from mess_user.models.token import RefreshToken
 
 if os.environ.get('ENVIRONMENT', 'dev') == 'dev':
     load_dotenv(os.environ.get('ENV_FILE', 'dev.env'))

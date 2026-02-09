@@ -3,7 +3,7 @@ from datetime import timedelta, timezone, datetime
 from jose import jwt
 from passlib.context import CryptContext
 
-from mess_auth import constants, settings
+from mess_user import constants, settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

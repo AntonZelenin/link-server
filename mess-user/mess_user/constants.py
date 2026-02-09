@@ -5,3 +5,5 @@ ROOT_DIR = os.path.join(
     '..',
 )
 DEV_ENV_FILE = os.path.join(ROOT_DIR, 'dev.env')
+
+ALGORITHM = "HS256"

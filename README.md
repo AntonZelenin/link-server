@@ -2,8 +2,7 @@
 
 ```
 link-server/
-├── mess-auth/          # Authentication service
-├── mess-user/          # User management service
+├── mess-user/          # User & authentication service
 ├── mess-message/       # Messaging service
 ├── mess/               # Kong API Gateway configuration
 ├── pyproject.toml      # Poetry dependency management
@@ -54,7 +53,7 @@ This project uses **Poetry** for local development and generates per-service `re
 poetry add <package>
 
 # Add a service-specific dependency
-poetry add --group mess-auth <package>
+poetry add --group mess-user <package>
 
 # Update poetry.lock and regenerate requirements.txt
 poetry lock
@@ -69,12 +68,10 @@ The Makefile uses pattern rules to regenerate `requirements.txt` only when `pypr
 
 ```bash
 # Using make
-make auth      # Runs on port 8001
 make user      # Runs on port 8002
 make message   # Runs on port 8003
 
 # Or manually with Poetry
-cd mess-auth && poetry run uvicorn mess_auth.main:app --reload --port 8001
 cd mess-user && poetry run uvicorn mess_user.main:app --reload --port 8002
 cd mess-message && poetry run uvicorn mess_message.main:app --reload --port 8003
 ```
@@ -121,8 +118,7 @@ poetry run ruff check --fix .
 
 Each service has its own `requirements.txt` file generated from the main Poetry configuration:
 
-- **mess-auth**: Authentication dependencies (FastAPI, SQLAlchemy, python-jose, passlib)
-- **mess-user**: User management dependencies (FastAPI, SQLAlchemy, httpx)
+- **mess-user**: User & auth dependencies (FastAPI, SQLAlchemy, python-jose, passlib)
 - **mess-message**: Messaging dependencies (FastAPI, SQLAlchemy, httpx, redis)
 
 These files are used by Docker for containerized deployments while Poetry is used for local development.
@@ -132,7 +128,6 @@ These files are used by Docker for containerized deployments while Poetry is use
 Each service has a Dockerfile that uses its respective `requirements.txt`:
 
 ```bash
-docker build -t mess-auth ./mess-auth
 docker build -t mess-user ./mess-user
 docker build -t mess-message ./mess-message
 ```
@@ -143,7 +138,6 @@ Each service has its own Alembic configuration for database migrations:
 
 ```bash
 # Run migrations for a specific service
-cd mess-auth && poetry run alembic upgrade head
 cd mess-user && poetry run alembic upgrade head
 cd mess-message && poetry run alembic upgrade head
 ```
@@ -154,7 +148,7 @@ cd mess-message && poetry run alembic upgrade head
 - `make install` - Install dependencies
 - `make install-all` - Install and generate requirements
 - `make requirements` - Generate requirements.txt files
-- `make auth/user/message` - Start services
+- `make user/message` - Start services
 - `make lint` - Run linters
 - `make format` - Format code
 - `make clean` - Clean cache
@@ -173,8 +167,8 @@ poetry run ruff check .                     # Lint code
 Since all dependencies are installed via Poetry, you can debug any service directly in your IDE:
 
 1. Set up your IDE to use the Poetry virtual environment
-2. Set the working directory to the service folder (e.g., `mess-auth`)
-3. Run the service's main module (e.g., `mess_auth.main:app`)
+2. Set the working directory to the service folder (e.g., `mess-user`)
+3. Run the service's main module (e.g., `mess_user.main:app`)
 
 ### Getting the Poetry Virtual Environment Path
 ```bash
@@ -183,11 +177,9 @@ poetry env info --path
 
 ## Architecture
 
-The platform consists of three microservices:
+The platform consists of two microservices:
 
-1. **mess-auth**: Handles user authentication, token generation and validation
-2. **mess-user**: Manages user profiles and information
-3. **mess-message**: Handles real-time messaging and chat functionality
+1. **mess-user**: Manages user registration, authentication, token management, and profile queries
+2. **mess-message**: Handles real-time messaging and chat functionality
 
 All services communicate through a Kong API Gateway (configured in `mess/`).
-

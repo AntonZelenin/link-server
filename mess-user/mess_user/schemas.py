@@ -31,9 +31,25 @@ class SearchUserRequest(BaseModel):
 
 
 class User(BaseModel):
-    id: str
+    user_id: str
     username: str
 
 
 class SearchUsersResponse(BaseModel):
     users: list[User]
+
+
+class LoginData(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str
+    user_id: str
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
